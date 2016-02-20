@@ -59,6 +59,7 @@ public class BatchParser
 				if (node.getNodeType() == Node.ELEMENT_NODE)
 				{
 					Element elem = (Element) node;
+					
 					Command comm = buildCommand(elem);
 					if (comm != null)
 					{

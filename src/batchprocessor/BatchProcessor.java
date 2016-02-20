@@ -42,7 +42,6 @@ public class BatchProcessor
 			System.err.println("Finished executing batch.");
 		} catch (Exception ex)
 		{
-			//System.err.println(ex.getMessage());
 			ex.printStackTrace();
 			System.err.println("Exiting batch execution due to error.");
 		}
