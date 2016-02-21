@@ -38,7 +38,7 @@ public class CmdCommand extends Command
 	@Override
 	public String describe() 
 	{
-		return "Command: " + path;
+		return "Command: " + id;
 	}
 	
 	@Override
@@ -89,12 +89,12 @@ public class CmdCommand extends Command
 				}
 				catch (Exception ex)
 				{
-					throw new ProcessException("Error loading IN file from FileCommand with id '" + in_file + ".");
+					throw new ProcessException("Error loading IN file from FileCommand with id '" + in_file + "'.");
 				}
 			}
 			else
 			{
-				throw new ProcessException("Unable to locate IN FileCommand with id '" + in_file + ".");
+				throw new ProcessException("Unable to locate IN FileCommand with id '" + in_file + "'.");
 			}
 		}
 		
@@ -107,7 +107,7 @@ public class CmdCommand extends Command
 			}
 			else
 			{
-				throw new ProcessException("Unable to locate OUT FileCommand with id '" + out_file + ".");
+				throw new ProcessException("Unable to locate OUT FileCommand with id '" + out_file + "'.");
 			}
 		}
 		try

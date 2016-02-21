@@ -14,6 +14,8 @@ package batchprocessor.command;
  * concurrently.
  */
 
+import java.lang.ProcessBuilder.Redirect;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -33,7 +35,7 @@ public class PipeCommand extends Command
 	@Override
 	public String describe() 
 	{
-		return "Pipe command...";
+		return "Pipe command";
 	}
 	
 	@Override
@@ -45,28 +47,82 @@ public class PipeCommand extends Command
 			throw new ProcessException("Missing 'id' attribute in PIPE command");
 		}
 		
-		NodeList nodes = element.getChildNodes();
-		
+		Node node = element.getFirstChild();
 		try
 		{
-			if (nodes.item(0).getNodeType() == Node.ELEMENT_NODE &&
-					nodes.item(1).getNodeType() == Node.ELEMENT_NODE)
+			do
 			{
-				L_command = (Element)nodes.item(0);
-				R_command = (Element)nodes.item(1);
-				
+				if (node.getNodeType() == Node.ELEMENT_NODE)
+				{
+					L_command = (Element)node;
+					node = node.getNextSibling();
+					break;
+				}
+				node = node.getNextSibling();
+			} while (node != null);
+			
+			if (node != null)
+			{
+				do
+				{
+					if (node.getNodeType() == Node.ELEMENT_NODE)
+					{
+						R_command = (Element)node;
+						break;
+					}
+					node = node.getNextSibling();
+				} while (node != null);
+			}
+
+			if (node == null || L_command == null || R_command == null)
+			{
+				throw new ProcessException("Unable to locate child CMD elements for PIPE command.");
 			}
 		}
 		catch (Exception ex)
 		{
-			throw new ProcessException("Error parsing PIPE command");
+			throw new ProcessException(ex.getMessage());
 		}
 	}
 	
 	@Override
-	public void execute(Batch batch)
+	public void execute(Batch batch) throws ProcessException
 	{
+		String R_id = R_command.getAttribute("id");
+		String L_id = L_command.getAttribute("id");
 		
+		ProcessBuilder R_procbuilder = ((PipeCmdCommand)batch.getCommands().get(R_id)).getProcessBuilder();
+		ProcessBuilder L_procbuilder = ((PipeCmdCommand)batch.getCommands().get(L_id)).getProcessBuilder();
+		/*
+		R_procbuilder.redirectOutput(Redirect.PIPE);
+		L_procbuilder.redirectInput(Redirect.PIPE);
+		
+		
+		
+		try
+		{
+			Process R_process = R_procbuilder.start();
+			R_process.waitFor();
+			Process L_process = L_procbuilder.start();
+			L_process.waitFor();
+			
+		}
+		catch (Exception ex)
+		{
+			throw new ProcessException("Error creating and running process: " + ex.getMessage());
+		}
+		
+		*/
 	}
 
+	public Element getLCommand()
+	{
+		return L_command;
+	}
+	
+	public Element getRCommand()
+	{
+		return R_command;
+	}
+	
 }

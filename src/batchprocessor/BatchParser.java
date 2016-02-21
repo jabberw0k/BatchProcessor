@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -33,6 +34,7 @@ import org.xml.sax.SAXException;
 import batchprocessor.command.CmdCommand;
 import batchprocessor.command.Command;
 import batchprocessor.command.FileCommand;
+import batchprocessor.command.PipeCmdCommand;
 import batchprocessor.command.PipeCommand;
 import batchprocessor.command.WDCommand;
 
@@ -51,24 +53,39 @@ public class BatchParser
 			
 			Element dNode = doc.getDocumentElement();
 			NodeList nodes = dNode.getChildNodes();
-			
+
 			batch = new Batch();
+			
 			for (int i = 0; i < nodes.getLength(); i++)
 			{
 				Node node = nodes.item(i);
 				if (node.getNodeType() == Node.ELEMENT_NODE)
 				{
 					Element elem = (Element) node;
-					
 					Command comm = buildCommand(elem);
 					if (comm != null)
 					{
+						if ("pipe".equalsIgnoreCase(elem.getNodeName()))
+						{
+							Command pipeLComm = buildPipeCmd(((PipeCommand)comm).getLCommand());
+							Command pipeRComm = buildPipeCmd(((PipeCommand)comm).getRCommand());
+							
+							if (pipeLComm != null && pipeRComm != null)
+							{
+								batch.addCommand(pipeLComm);
+								batch.addCommand(pipeRComm);
+							}
+							else
+							{
+								return null;
+							}
+						}
 						batch.addCommand(comm);
 					}
 					else
 					{
 						return null;
-					}
+					}	
 				}
 			}			
 		} catch (FileNotFoundException ex)
@@ -89,8 +106,7 @@ public class BatchParser
 			System.err.println(ex.getMessage());
 			ex.printStackTrace();
 		}
-		
-		
+
 		return batch;
 	}
 
@@ -107,22 +123,22 @@ public class BatchParser
 			}
 			else if ("wd".equalsIgnoreCase(cmdName))
 			{
-				System.err.println("Parsing wd");
+				System.out.println("Parsing wd");
 				command = new WDCommand(element);
 			}
 			else if ("file".equalsIgnoreCase(cmdName))
 			{
-				System.err.println("Parsing file");
+				System.out.println("Parsing file");
 				command = new FileCommand(element);
 			}
 			else if ("cmd".equalsIgnoreCase(cmdName))
 			{
-				System.err.println("Parsing cmd");
+				System.out.println("Parsing cmd");
 				command = new CmdCommand(element);
 			}
 			else if ("pipe".equalsIgnoreCase(cmdName))
 			{
-				System.err.println("Parsing pipe");
+				System.out.println("Parsing pipe");
 				command = new PipeCommand(element);
 			}
 			else
@@ -138,6 +154,21 @@ public class BatchParser
 		return command;
 	}
 	
-	
+	static Command buildPipeCmd(Element element)
+	{
+		Command command = null;
+		try
+		{
+			System.out.println("Parsing pipeCmd");
+			command = new PipeCmdCommand(element);
+		}
+		catch (ProcessException ex)
+		{
+			System.err.println(ex.getMessage());
+			return null;
+		}
+		
+		return command;
+	}
 	
 }

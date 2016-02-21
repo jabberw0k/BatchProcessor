@@ -29,17 +29,17 @@ public class BatchProcessor
 	
 	public static void executeBatch() 
 	{
-		System.err.println("Executing batch...");
+		System.out.println("Executing batch...");
 		
 		try {	
 			for (int c = 0; c < batch.getCommandList().size(); c++)
 			{
 				Command comm = batch.getCommandList().get(c);
-				System.err.println(comm.describe());
+				System.out.println(comm.describe());
 				comm.execute(batch);
 			}
 			
-			System.err.println("Finished executing batch.");
+			System.out.println("Finished executing batch.");
 		} catch (Exception ex)
 		{
 			ex.printStackTrace();
@@ -56,7 +56,7 @@ public class BatchProcessor
 		}
 		else
 		{
-			batchfile = Paths.get(System.getProperty("user.dir"), "work", "batch1.dos.xml");
+			batchfile = Paths.get(System.getProperty("user.dir"), "work", "batch4.xml");
 		}
 
 		batch = BatchParser.buildBatch(batchfile);

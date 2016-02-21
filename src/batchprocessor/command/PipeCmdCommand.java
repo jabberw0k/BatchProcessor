@@ -28,6 +28,7 @@ public class PipeCmdCommand extends Command
 	private String args;
 	private String in_file;
 	private String out_file;
+	private ProcessBuilder process;
 	
 	public PipeCmdCommand(Element element) throws ProcessException
 	{
@@ -37,7 +38,7 @@ public class PipeCmdCommand extends Command
 	@Override
 	public String describe() 
 	{
-		return "Command: " + path;
+		return "Command: " + id;
 	}
 
 	@Override
@@ -72,9 +73,9 @@ public class PipeCmdCommand extends Command
 				command.add(s);
 			}
 		}
-		ProcessBuilder procBuilder = new ProcessBuilder();
-		procBuilder.command(command);
-		procBuilder.directory(new File(batch.getWorkingDir()));
+		process = new ProcessBuilder();
+		process.command(command);
+		process.directory(new File(batch.getWorkingDir()));
 		
 		if (!(in_file == null || in_file.isEmpty()))
 		{
@@ -82,8 +83,8 @@ public class PipeCmdCommand extends Command
 			{
 				try
 				{
-					File stdin = new File(procBuilder.directory(),((FileCommand)batch.getCommands().get(in_file)).getPath());
-					procBuilder.redirectInput(stdin);
+					File stdin = new File(process.directory(),((FileCommand)batch.getCommands().get(in_file)).getPath());
+					process.redirectInput(stdin);
 				}
 				catch (Exception ex)
 				{
@@ -100,23 +101,20 @@ public class PipeCmdCommand extends Command
 		{
 			if(batch.getCommands().containsKey(out_file))
 			{
-				File stdout = new File(procBuilder.directory(),((FileCommand)batch.getCommands().get(out_file)).getPath());
-				procBuilder.redirectOutput(stdout);
+				File stdout = new File(process.directory(),((FileCommand)batch.getCommands().get(out_file)).getPath());
+				process.redirectOutput(stdout);
 			}
 			else
 			{
 				throw new ProcessException("Unable to locate OUT FileCommand with id '" + out_file + ".");
 			}
 		}
-		try
-		{
-			Process process = procBuilder.start();
-			process.waitFor();
-		}
-		catch (Exception ex)
-		{
-			throw new ProcessException("Error creating and running process: " + ex.getMessage());
-		}
+		System.out.println("Deferring execution for " + path);
+	}
+	
+	public ProcessBuilder getProcessBuilder()
+	{
+		return process;
 	}
 	
 }
