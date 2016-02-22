@@ -14,12 +14,11 @@ package batchprocessor.command;
  * concurrently.
  */
 
-import java.lang.ProcessBuilder.Redirect;
-
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import batchprocessor.Batch;
 import batchprocessor.ProcessException;
 
@@ -91,28 +90,26 @@ public class PipeCommand extends Command
 		String R_id = R_command.getAttribute("id");
 		String L_id = L_command.getAttribute("id");
 		
-		ProcessBuilder R_procbuilder = ((PipeCmdCommand)batch.getCommands().get(R_id)).getProcessBuilder();
 		ProcessBuilder L_procbuilder = ((PipeCmdCommand)batch.getCommands().get(L_id)).getProcessBuilder();
-		/*
-		R_procbuilder.redirectOutput(Redirect.PIPE);
-		L_procbuilder.redirectInput(Redirect.PIPE);
+		ProcessBuilder R_procbuilder = ((PipeCmdCommand)batch.getCommands().get(R_id)).getProcessBuilder();
 		
-		
-		
+		L_procbuilder.redirectErrorStream(true);
+		R_procbuilder.redirectErrorStream(true);
+
 		try
 		{
-			Process R_process = R_procbuilder.start();
-			R_process.waitFor();
-			Process L_process = L_procbuilder.start();
-			L_process.waitFor();
+			final Process L_process = L_procbuilder.start();
+			InputStream pipe_in = L_process.getInputStream();
+			final Process R_process = R_procbuilder.start();
+			OutputStream pipe_out = R_process.getOutputStream();	
+			pipeStream(pipe_in, pipe_out);
 			
 		}
 		catch (Exception ex)
 		{
 			throw new ProcessException("Error creating and running process: " + ex.getMessage());
 		}
-		
-		*/
+		System.out.println("Pipe completed: " + L_id + " | " + R_id);
 	}
 
 	public Element getLCommand()
@@ -123,6 +120,31 @@ public class PipeCommand extends Command
 	public Element getRCommand()
 	{
 		return R_command;
+	}
+	
+	static void pipeStream(final InputStream pipe_in, final OutputStream pipe_out)
+	{
+		Runnable pipeThread = (new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				try
+				{
+					int achar;
+					while ((achar = pipe_in.read()) != -1)
+					{
+						pipe_out.write(achar);
+					}
+					pipe_out.close();
+				} catch (IOException ex)
+				{
+					throw new RuntimeException("IOException when running pipe Thread: " + ex.getMessage());
+				}
+			}
+		});
+	
+		new Thread(pipeThread).start();
 	}
 	
 }

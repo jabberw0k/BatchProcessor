@@ -109,7 +109,7 @@ public class PipeCmdCommand extends Command
 				throw new ProcessException("Unable to locate OUT FileCommand with id '" + out_file + ".");
 			}
 		}
-		System.out.println("Deferring execution for " + path);
+		System.out.println("Deferring execution for " + id);
 	}
 	
 	public ProcessBuilder getProcessBuilder()
