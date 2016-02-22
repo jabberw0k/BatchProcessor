@@ -1,9 +1,6 @@
 package batchprocessor;
 
 
-
-
-
 /*
  * CS 5348 - Operating Systems Concepts
  * Project 1: Batch Language Processing
@@ -49,14 +46,15 @@ public class BatchProcessor
 	
 	public static void main(String[] args) 
 	{
-		Path batchfile;
+		Path batchfile = null;
 		if (args.length > 0)
 		{
 			batchfile = Paths.get(args[0]);
 		}
 		else
 		{
-			batchfile = Paths.get(System.getProperty("user.dir"), "work", "batch4.xml");
+			System.err.println("USAGE: java -jar BatchProcessor.jar [xml filename]");
+			System.exit(0);
 		}
 
 		batch = BatchParser.buildBatch(batchfile);

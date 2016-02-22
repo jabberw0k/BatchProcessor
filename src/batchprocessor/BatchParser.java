@@ -92,19 +92,23 @@ public class BatchParser
 		{
 			System.err.println("Unable to open file: " + batchFile);
 			ex.printStackTrace();
+			System.exit(1);
 			
 		} catch (ParserConfigurationException ex)
 		{
 			System.err.println("Error creating DocumentBuilder");
 			ex.printStackTrace();
+			System.exit(1);
 		} catch (IOException ex)
 		{
 			System.err.println(ex.getMessage());
 			ex.printStackTrace();
+			System.exit(1);
 		} catch (SAXException ex)
 		{
 			System.err.println(ex.getMessage());
 			ex.printStackTrace();
+			System.exit(1);
 		}
 
 		return batch;
